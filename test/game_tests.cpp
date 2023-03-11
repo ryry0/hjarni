@@ -1,72 +1,47 @@
 
 #include "CppUTest/TestHarness.h"
-#include "PID.h"
+#include "chess.h"
 
-pid_data_t pid;
-const float MAX_INTEGRAL_GUARD = 1.0f;
-const float MIN_INTEGRAL_GUARD = -1.0f;
-const float EPSILON = 0.05f;
 
-TEST_GROUP(PIDTestGroup)
+TEST_GROUP(ChessSetupTeardownGroup)
 {
-  void setup() {
-    pid_init(&pid, 1.0f, 1.0f, 0.1f, MIN_INTEGRAL_GUARD, MAX_INTEGRAL_GUARD);
-  }
-
-  void teardown() {
-  }
 };
 
-TEST(PIDTestGroup, MaxTest_velocUpdate)
+TEST(ChessSetupTeardownGroup, create_and_destroy)
 {
-  float output = 0;
 
-  for (size_t i = 0; i < 100; ++i) {
-    output = pid_FeedbackCtrl(&pid, 2.0f, 0.0f, 0.01f, pid_velocUpdate);
-  }
-
-  DOUBLES_EQUAL(MAX_INTEGRAL_GUARD, output, EPSILON);
-}
-
-TEST(PIDTestGroup, MinTest_velocUpdate)
-{
-  float output = 0;
-
-  for (size_t i = 0; i < 100; ++i) {
-    output = pid_FeedbackCtrl(&pid, -2.0f, 0.0f, 0.01f, pid_velocUpdate);
-  }
-
-  DOUBLES_EQUAL(MIN_INTEGRAL_GUARD, output, EPSILON);
-}
-
-TEST(PIDTestGroup, MaxTest_minPIUpdate)
-{
-  float output = 0;
-
-  for (size_t i = 0; i < 100; ++i) {
-    output = pid_FeedbackCtrl(&pid, 2.0f, 0.0f, 0.01f, pid_minPIUpdate);
-  }
-
-  DOUBLES_EQUAL(MAX_INTEGRAL_GUARD, output, EPSILON);
+  size_t num_pieces = 10;
+  ch_board_h board = ch_createBoard(num_pieces);
+  CHECK(NULL != board);
+  ch_destroyBoard(&board);
+  POINTERS_EQUAL(NULL, board);
 }
 
 
-TEST(PIDTestGroup, MinTest_minPIUpdate)
+TEST(ChessSetupTeardownGroup, check_dummy_pieces)
 {
-  float output = 0;
 
-  for (size_t i = 0; i < 100; ++i) {
-    output = pid_FeedbackCtrl(&pid, -2.0f, 0.0f, 0.01f, pid_minPIUpdate);
+  size_t num_pieces = 10;
+  ch_board_h board = ch_createBoard(num_pieces);
+  ch_piece_h piece;
+  for (size_t i = 0; i < num_pieces; ++i) {
+    piece = ch_getPieceFromBoard(board, i);
+    CHECK_EQUAL_TEXT(ch_getPieceRank(piece), 0, "piece rank");
+    CHECK_EQUAL_TEXT(ch_getPieceFile(piece), 0, "piece file");
+    CHECK_EQUAL_TEXT(ch_getPieceType(piece), CH_DUMMY, "piece type");
+    CHECK_EQUAL_TEXT(ch_getPieceColor(piece), CH_WHITE, "piece color");
+    CHECK_EQUAL_TEXT(ch_getPieceId(piece), i, "piece id");
   }
-
-  DOUBLES_EQUAL(MIN_INTEGRAL_GUARD, output, EPSILON);
+  ch_destroyBoard(&board);
 }
 
+/*
 TEST(PIDTestGroup, SecondTest) {
   //STRCMP_EQUAL("hello", "world");
   //LONGS_EQUAL(1, 2);
   //CHECK(false);
   //FAIL("Fail me!");
 }
+*/
 
 
