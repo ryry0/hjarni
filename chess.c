@@ -1,22 +1,31 @@
 #include <stdlib.h>
-typedef struct ch_piece_s* ch_piece_t;
-typedef struct ch_board_s* ch_board_t;
+#include <stdint.h>
+#include <stdbool.h>
 
+//files are columns
+//ranks are rows
+
+
+
+//handle declarations
+typedef struct ch_piece_s* ch_piece_h;
+typedef struct ch_board_s* ch_board_h;
+
+//enums
 typedef enum ch_piece_type_e {
+  CH_DUMMY, //dummy piece for initialization
   CH_PAWN,
   CH_KING,
   CH_PIECE_MAX
 } ch_piece_type_t;
 
 typedef enum ch_color_e {
-  CH_BLACK_PLAYER,
-  CH_WHITE_PLAYER,
+  CH_BLACK,
+  CH_WHITE,
   CH_COLOR_MAX
 } ch_color_t;
 
-//files are columns
-//ranks are rows
-
+//structure definitions
 struct ch_piece_s {
   uint8_t rank;
   uint8_t file;
@@ -34,7 +43,7 @@ struct ch_board_s {
   uint8_t num_files;
 
   size_t num_pieces;
-  ch_piece_t pieces;
+  ch_piece_h pieces;
 };
 
 struct ch_game_s {
@@ -45,12 +54,22 @@ struct ch_game_s {
   struct ch_board_s board;
 };
 
-ch_initBoard(size_t num_pieces) {
+//forward declarations
+void ch_initPiece(ch_piece_h piece,
+    uint8_t rank, uint8_t file, uint8_t id,
+    ch_piece_type_t type, ch_color_t color);
+
+//function implementations
+void ch_initBoard(ch_board_h board, size_t num_pieces) {
   board->num_pieces = num_pieces;
-  board->pieces = (ch_piece_t) malloc(num_pieces * sizeof (struct ch_piece_s))
+  board->pieces = (ch_piece_h) malloc(num_pieces * sizeof (struct ch_piece_s));
+  //add a bunch of zero
+  for (size_t i = 0; i < num_pieces; ++i) {
+    ch_initPiece(&board->pieces[i], 0, 0, i, CH_DUMMY, CH_WHITE);
+  }
 }
 
-ch_destroyBoard() {
+void ch_destroyBoard(ch_board_h board) {
   free(board->pieces);
 }
 
@@ -70,7 +89,7 @@ ch_addPieceToBoard() {
  * \param color the color of the piece
  */
 
-ch_initPiece(ch_piece_t piece,
+void ch_initPiece(ch_piece_h piece,
     uint8_t rank, uint8_t file, uint8_t id,
     ch_piece_type_t type, ch_color_t color) {
   piece->type = type;
