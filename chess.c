@@ -77,6 +77,12 @@ bool ch_setPiece(ch_board_h board,
 
   if (id > board->num_pieces)
     return false;
+  if ((rank == 0) ||
+      (rank > board->num_ranks))
+    return false;
+  if ((file == 0) ||
+      (file > board->num_files))
+    return false;
 
   ch_piece_h piece = &board->pieces[id];
 

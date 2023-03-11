@@ -54,7 +54,7 @@ TEST_GROUP(ChessSetPieceGroup)
   }
 };
 
-TEST(ChessSetPieceGroup, set_piece_fail_out_of_bounds)
+TEST(ChessSetPieceGroup, set_piece_fail_id_out_of_bounds)
 {
   uint8_t id = 20;
   uint8_t rank = 2;
@@ -66,6 +66,35 @@ TEST(ChessSetPieceGroup, set_piece_fail_out_of_bounds)
   CHECK_EQUAL(false, result);
 }
 
+TEST(ChessSetPieceGroup, set_piece_fail_rank_out_of_bounds)
+{
+  uint8_t id = 2;
+  uint8_t rank = 9;
+  uint8_t file = 3;
+  ch_piece_type_t type = CH_KING;
+  ch_color_t color = CH_BLACK;
+
+  bool result = ch_setPiece(board, id, rank, file, type, color);
+  CHECK_EQUAL(false, result);
+
+  result = ch_setPiece(board, id, 0, file, type, color);
+  CHECK_EQUAL(false, result);
+}
+
+TEST(ChessSetPieceGroup, set_piece_fail_file_out_of_bounds)
+{
+  uint8_t id = 1;
+  uint8_t rank = 2;
+  uint8_t file = 5;
+  ch_piece_type_t type = CH_KING;
+  ch_color_t color = CH_BLACK;
+
+  bool result = ch_setPiece(board, id, rank, file, type, color);
+  CHECK_EQUAL(false, result);
+
+  result = ch_setPiece(board, id, rank, 0, type, color);
+  CHECK_EQUAL(false, result);
+}
 
 TEST(ChessSetPieceGroup, set_piece_success)
 {
@@ -117,8 +146,8 @@ TEST(ChessSetPieceGroup, set_piece_two_kings)
 
   //set the white king
   uint8_t white_id = 5;
-  uint8_t white_rank = 2;
-  uint8_t white_file = 3;
+  uint8_t white_rank = 1;
+  uint8_t white_file = 4;
   ch_piece_type_t white_type = CH_KING;
   ch_color_t white_color = CH_WHITE;
 
