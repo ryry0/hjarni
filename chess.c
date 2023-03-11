@@ -3,6 +3,7 @@
 
 //files are columns
 //ranks are rows
+//both are 1-indexed.
 
 #include <chess.h>
 
@@ -36,21 +37,32 @@ struct ch_game_s {
   struct ch_board_s board;
 };
 
+//forward declarations
+void ch_initPiece(ch_piece_h piece,
+    uint8_t id, uint8_t rank, uint8_t file,
+    ch_piece_type_t type, ch_color_t color);
+
 //function implementations
-ch_board_h ch_createBoard(size_t num_pieces) {
+/** creates a board and fills it with num_pieces dummy pieces */
+ch_board_h ch_createBoard(uint8_t num_ranks, uint8_t num_files, size_t num_pieces) {
   ch_board_h board = (ch_board_h) malloc(sizeof (struct ch_board_s));
+
+  board->num_ranks = num_ranks;
+  board->num_files = num_files;
 
   board->num_pieces = num_pieces;
   board->pieces = (ch_piece_h) malloc(num_pieces * sizeof (struct ch_piece_s));
 
   //add a bunch of dummy pieces
   for (uint8_t i = 0; i < num_pieces; ++i) {
-    ch_initPiece(&board->pieces[i], 0, 0, i, CH_DUMMY, CH_WHITE);
+    ch_initPiece(&board->pieces[i], i, 0, 0, CH_DUMMY, CH_WHITE);
+    //purposefully put to 0,0, which doesn't exist on the board.
   }
 
   return board;
 }
 
+/** deallocates the board */
 void ch_destroyBoard(ch_board_h* board) {
   free((*board)->pieces);
   (*board)->pieces = NULL;
@@ -58,10 +70,38 @@ void ch_destroyBoard(ch_board_h* board) {
   *board = NULL;
 }
 
-/*
-ch_addPieceToBoard() {
+/** sets characteristics of a piece. */
+bool ch_setPiece(ch_board_h board,
+    uint8_t id, uint8_t rank, uint8_t file,
+    ch_piece_type_t type, ch_color_t color) {
+
+  if (id > board->num_pieces)
+    return false;
+
+  ch_piece_h piece = &board->pieces[id];
+
+  piece->rank = rank;
+  piece->file = file;
+  piece->type = type;
+  piece->color = color;
+
+  return true;
 }
-*/
+
+bool ch_movePiece(ch_board_h board,
+    uint8_t source_rank,
+    uint8_t source_file,
+    uint8_t dest_rank,
+    uint8_t dest_file) {
+  //determine if there is a piece at source rank and file
+  //get the piece
+  //check destination
+  //move it according to the rules
+  return false;
+}
+
+void ch_drawBoard(ch_board_h board) {
+}
 
 /**
  * \brief initialize a chess piece
@@ -75,7 +115,7 @@ ch_addPieceToBoard() {
  */
 
 void ch_initPiece(ch_piece_h piece,
-    uint8_t rank, uint8_t file, uint8_t id,
+    uint8_t id, uint8_t rank, uint8_t file,
     ch_piece_type_t type, ch_color_t color) {
   piece->rank = rank;
   piece->file = file;
