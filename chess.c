@@ -94,6 +94,7 @@ bool ch_setPiece(ch_board_h board,
   return true;
 }
 
+/*
 bool ch_movePiece(ch_board_h board,
     uint8_t source_rank,
     uint8_t source_file,
@@ -105,8 +106,31 @@ bool ch_movePiece(ch_board_h board,
   //move it according to the rules
   return false;
 }
+*/
+
+ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file) {
+  ch_piece_h piece = NULL;
+
+  if ((rank == 0) || (file == 0))
+    return piece;
+
+  for (uint8_t i = 0; i < board->num_pieces; ++i) {
+    if ((board->pieces[i].rank == rank) &&
+        (board->pieces[i].file == file))
+      piece = &board->pieces[i];
+  }
+  return piece;
+}
+
+#define BLK "\e[0;30m"
+#define RST "\e[0m"
 
 void ch_drawBoard(ch_board_h board) {
+  //remember rank and file are one indexed
+  for (uint8_t file = 1; file <= board->num_files; ++file) {
+    for (uint8_t rank = 1; rank <= board->num_ranks; ++rank) {
+    }
+  }
 }
 
 /**

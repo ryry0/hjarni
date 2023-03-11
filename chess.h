@@ -50,6 +50,7 @@ bool ch_setPiece(ch_board_h board,
     uint8_t id, uint8_t rank, uint8_t file,
     ch_piece_type_t type, ch_color_t color);
 
+ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file);
 #ifdef __cplusplus
 }
 #endif
