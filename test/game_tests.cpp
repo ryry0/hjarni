@@ -127,6 +127,37 @@ TEST(ChessSetPieceGroup, set_piece_success)
 
 }
 
+TEST(ChessSetPieceGroup, set_piece_pawn)
+{
+  uint8_t id = 3;
+  uint8_t rank = 2;
+  uint8_t file = 3;
+  ch_piece_type_t type = CH_PAWN;
+  ch_color_t color = CH_BLACK;
+
+  bool result = ch_setPiece(board, id, rank, file, type, color);
+  ch_piece_h piece = ch_getPieceFromBoard(board, id);
+
+  CHECK_EQUAL(true, result);
+  CHECK_EQUAL_TEXT(ch_getPieceRank(piece), rank, "piece rank");
+  CHECK_EQUAL_TEXT(ch_getPieceFile(piece), file, "piece file");
+  CHECK_EQUAL_TEXT(ch_getPieceType(piece), CH_PAWN, "piece type");
+  CHECK_EQUAL_TEXT(ch_getPieceColor(piece), CH_BLACK, "piece color");
+
+  //check all the other pieces to see if they're dummies
+
+  for (size_t i = 0; i < num_pieces; ++i) {
+    if (i == id) continue;
+    piece = ch_getPieceFromBoard(board, i);
+    CHECK_EQUAL_TEXT(ch_getPieceRank(piece), 0, "piece rank");
+    CHECK_EQUAL_TEXT(ch_getPieceFile(piece), 0, "piece file");
+    CHECK_EQUAL_TEXT(ch_getPieceType(piece), CH_DUMMY, "piece type");
+    CHECK_EQUAL_TEXT(ch_getPieceColor(piece), CH_WHITE, "piece color");
+    CHECK_EQUAL_TEXT(ch_getPieceId(piece), i, "piece id");
+  }
+
+}
+
 TEST(ChessSetPieceGroup, set_piece_two_kings)
 {
   uint8_t id = 3;
@@ -256,6 +287,49 @@ TEST(ChessGetPieceAtLocationGroup, get_at_empty)
   POINTERS_EQUAL(NULL, piece);
 }
 
+TEST_GROUP(ChessDrawBoard)
+{
+  ch_board_h board;
+  uint8_t num_ranks = 8;
+  uint8_t num_files = 8;
+  size_t num_pieces = 10;
+
+  uint8_t id = 3;
+  uint8_t rank = 4;
+  uint8_t file = 1;
+
+  uint8_t white_id = 5;
+  uint8_t white_rank = 1;
+  uint8_t white_file = 4;
+
+  void setup() {
+    board = ch_createBoard(num_ranks, num_files, num_pieces);
+
+    ch_piece_type_t type = CH_KING;
+    ch_color_t color = CH_BLACK;
+
+    bool result = ch_setPiece(board, id, rank, file, type, color);
+
+    //set the white king
+    ch_piece_type_t white_type = CH_KING;
+    ch_color_t white_color = CH_WHITE;
+
+    bool white_result = ch_setPiece(board, white_id, white_rank,
+        white_file, white_type, white_color);
+
+    bool pawn = ch_setPiece(board, 2, 2,
+        1, CH_PAWN, color);
+  }
+
+  void teardown() {
+    ch_destroyBoard(&board);
+  }
+};
+
+TEST(ChessDrawBoard, draw_board)
+{
+  ch_drawBoard(board);
+}
 /*
 TEST(PIDTestGroup, SecondTest) {
   //STRCMP_EQUAL("hello", "world");

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 //files are columns
 //ranks are rows
@@ -122,14 +123,51 @@ ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file) {
   return piece;
 }
 
-#define BLK "\e[0;30m"
+#define RED "\e[0;31m"
 #define RST "\e[0m"
 
 void ch_drawBoard(ch_board_h board) {
   //remember rank and file are one indexed
-  for (uint8_t file = 1; file <= board->num_files; ++file) {
-    for (uint8_t rank = 1; rank <= board->num_ranks; ++rank) {
+  for (uint8_t rank = board->num_ranks; rank >= 1; --rank) {
+    //print a bar
+    for(uint8_t i = 1; i <= 4*board->num_files; ++i) printf("-");
+    printf("-\n");
+
+    for (uint8_t file = 1; file <= board->num_files; ++file) {
+      char character = ' ';
+      ch_color_t color = CH_WHITE;
+      ch_piece_h piece = ch_getPieceAtLocation(board, rank, file);
+      if (piece != NULL) {
+        switch (piece->type) {
+          case CH_PAWN:
+            character = 'p';
+            break;
+
+          case CH_KING:
+            character = 'K';
+            break;
+
+          default:
+            break;
+        }
+        color = piece->color;
+      }
+      if (color == CH_BLACK)
+        printf("| " RED "%c" RST " ", character);
+      else
+        printf("| %c ", character);
     }
+    printf("| %d\n", rank);
+
+  }
+  //print bottom bar
+  for(uint8_t i = 1; i <= 4*board->num_files; ++i) printf("-");
+  printf("-\n");
+
+  //print the bottom legend
+  char letter = 'a';
+  for (uint8_t file = 1; file <= board->num_files; ++file) {
+    printf("  %c ", letter++);
   }
 }
 

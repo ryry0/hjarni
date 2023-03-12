@@ -27,6 +27,11 @@ typedef enum ch_color_e {
   CH_COLOR_MAX
 } ch_color_t;
 
+typedef enum ch_invalid_move_e{
+  CH_DEST_OCCUPIED,
+  CH_NO_PIECE_AT_ORIGIN,
+  CH_INVALID_MOVE_MAX
+} ch_invalid_move_t;
 //in-game API
 
 //internal API exposed for testing
@@ -51,6 +56,8 @@ bool ch_setPiece(ch_board_h board,
     ch_piece_type_t type, ch_color_t color);
 
 ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file);
+void ch_drawBoard(ch_board_h board);
+
 #ifdef __cplusplus
 }
 #endif
