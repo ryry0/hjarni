@@ -119,6 +119,9 @@ ch_move_t ch_move(ch_board_h board,
   if ((dest_file == 0) || (dest_file > board->num_files))
     return CH_INVALID_DESTINATION;
 
+  if ((dest_file == source_file) && (dest_rank == source_rank))
+    return CH_INVALID_DESTINATION;
+
   //determine if there is a piece at source rank and file
   ch_piece_h piece = ch_getPieceAtLocation(board, source_rank, source_file);
 
@@ -175,6 +178,18 @@ ch_move_t ch_move(ch_board_h board,
         valid_move = true;
       break;
 
+    case CH_QUEEN:
+      //if (abs(rank_difference) == abs(file_difference))
+      //else if (file_difference == 0)
+      //else if (rank_difference == 0)
+    case CH_BISHOP:
+      //if (abs(rank_difference) == abs(file_difference))
+    case CH_ROOK:
+      //if (file_difference == 0)
+      //else if (rank_difference == 0)
+    case CH_KNIGHT:
+      //uhhh abs file == 3, abs rank == 2
+      //abs file == 2, abs rank == 3
     case CH_DUMMY:
     case CH_PIECE_MAX:
     default:
@@ -183,8 +198,11 @@ ch_move_t ch_move(ch_board_h board,
 
   if (valid_move == true) {
     ch_movePiece(piece, dest_rank, dest_file);
-    if (dest_piece != NULL)
+    if (dest_piece != NULL) {
       dest_piece->captured = true;
+      dest_piece->rank = 0; //move off board
+      dest_piece->file = 0;
+    }
 
     return CH_VALID_MOVE;
   }
@@ -196,6 +214,19 @@ void ch_movePiece(ch_piece_h piece, uint8_t rank, uint8_t file) {
   piece->rank = rank;
   piece->file = file;
   piece->has_moved = true;
+}
+
+ch_move_t ch_moveParseSimpleNotation(ch_board_h board, char *str, ch_color_t active_color) {
+  //assume file rank file rank, e.g. e1b2
+
+  uint8_t source_file = str[0] - 'a' + 1;
+  uint8_t source_rank = str[1];
+
+  uint8_t dest_file = str[2] - 'a' + 1;
+  uint8_t dest_rank = str[3];
+
+  return ch_move(board, source_rank, source_file, dest_rank, dest_file,
+      active_color);
 }
 
 ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file) {
@@ -229,12 +260,17 @@ void ch_drawBoard(ch_board_h board) {
       if (piece != NULL) {
         if (piece->captured == false) {
           switch (piece->type) {
-            case CH_PAWN:
-              character = 'p';
+            case CH_PAWN: character = 'p';
               break;
-
-            case CH_KING:
-              character = 'K';
+            case CH_KING: character = 'K';
+              break;
+            case CH_QUEEN: character = 'Q';
+              break;
+            case CH_BISHOP: character = 'B';
+              break;
+            case CH_ROOK: character = 'R';
+              break;
+            case CH_KNIGHT: character = 'N';
               break;
 
             case CH_DUMMY:
@@ -251,8 +287,8 @@ void ch_drawBoard(ch_board_h board) {
         printf("| %c ", character);
     }
     printf("| %d\n", rank);
-
   }
+
   //print bottom bar
   for(uint8_t i = 1; i <= 4*board->num_files; ++i) printf("-");
   printf("-\n");

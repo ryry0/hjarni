@@ -330,6 +330,7 @@ TEST(ChessDrawBoard, draw_board)
 {
   ch_drawBoard(board);
 }
+
 //test if captured don't draw
 
 //test
@@ -337,11 +338,13 @@ TEST(ChessDrawBoard, draw_board)
 //piece doesn't exist
 //active color tries to move a piece of the other color
 //if colors match on destination piece
-//capture
+//capture, make sure it's off board
+//source and dest the same
 //
 //pawn move one rank
 //pawn move two rank
 //pawn capture diagonally
+//king move anywhere once
 
 /*
 TEST(PIDTestGroup, SecondTest) {

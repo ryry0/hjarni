@@ -18,6 +18,10 @@ typedef enum ch_piece_type_e {
   CH_DUMMY, //dummy piece for initialization
   CH_PAWN,
   CH_KING,
+  CH_QUEEN,
+  CH_BISHOP,
+  CH_ROOK,
+  CH_KNIGHT,
   CH_PIECE_MAX
 } ch_piece_type_t;
 
