@@ -227,13 +227,13 @@ TEST_GROUP(ChessGetPieceAtLocationGroup)
     ch_piece_type_t type = CH_KING;
     ch_color_t color = CH_BLACK;
 
-    bool result = ch_setPiece(board, id, rank, file, type, color);
+    ch_setPiece(board, id, rank, file, type, color);
 
     //set the white king
     ch_piece_type_t white_type = CH_KING;
     ch_color_t white_color = CH_WHITE;
 
-    bool white_result = ch_setPiece(board, white_id, white_rank,
+    ch_setPiece(board, white_id, white_rank,
         white_file, white_type, white_color);
   }
 
@@ -308,16 +308,16 @@ TEST_GROUP(ChessDrawBoard)
     ch_piece_type_t type = CH_KING;
     ch_color_t color = CH_BLACK;
 
-    bool result = ch_setPiece(board, id, rank, file, type, color);
+    ch_setPiece(board, id, rank, file, type, color);
 
     //set the white king
     ch_piece_type_t white_type = CH_KING;
     ch_color_t white_color = CH_WHITE;
 
-    bool white_result = ch_setPiece(board, white_id, white_rank,
+    ch_setPiece(board, white_id, white_rank,
         white_file, white_type, white_color);
 
-    bool pawn = ch_setPiece(board, 2, 2,
+    ch_setPiece(board, 2, 2,
         1, CH_PAWN, color);
   }
 
@@ -330,6 +330,19 @@ TEST(ChessDrawBoard, draw_board)
 {
   ch_drawBoard(board);
 }
+//test if captured don't draw
+
+//test
+//destination/source out of bounds
+//piece doesn't exist
+//active color tries to move a piece of the other color
+//if colors match on destination piece
+//capture
+//
+//pawn move one rank
+//pawn move two rank
+//pawn capture diagonally
+
 /*
 TEST(PIDTestGroup, SecondTest) {
   //STRCMP_EQUAL("hello", "world");

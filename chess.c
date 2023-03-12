@@ -33,7 +33,10 @@ struct ch_board_s {
 struct ch_game_s {
   uint32_t black_score;
   uint32_t white_score;
+  size_t turn_number;
+
   ch_color_t active_player;
+
   bool game_finished;
   struct ch_board_s board;
 };
@@ -95,19 +98,105 @@ bool ch_setPiece(ch_board_h board,
   return true;
 }
 
-/*
-bool ch_movePiece(ch_board_h board,
+ch_move_t ch_move(ch_board_h board,
     uint8_t source_rank,
     uint8_t source_file,
     uint8_t dest_rank,
-    uint8_t dest_file) {
+    uint8_t dest_file,
+    ch_color_t active_color) {
+
+  //check if source rank/file and dest rank/file are out of bounds
+
+  if ((source_rank == 0) || (source_rank > board->num_ranks))
+    return CH_INVALID_SOURCE;
+
+  if ((source_file == 0) || (source_file > board->num_files))
+    return CH_INVALID_SOURCE;
+
+  if ((dest_rank == 0) || (dest_rank > board->num_ranks))
+    return CH_INVALID_DESTINATION;
+
+  if ((dest_file == 0) || (dest_file > board->num_files))
+    return CH_INVALID_DESTINATION;
+
   //determine if there is a piece at source rank and file
-  //get the piece
-  //check destination
+  ch_piece_h piece = ch_getPieceAtLocation(board, source_rank, source_file);
+
+  if (piece == NULL) //if the piece doesn't exist
+    return CH_NO_PIECE_AT_ORIGIN;
+
+  //if active color tries to move a piece of the other color
+  if (piece->color != active_color)
+    return CH_WRONG_COLOR;
+
+
+  ch_piece_h dest_piece = ch_getPieceAtLocation(board, dest_rank, dest_file);
+
+  //if destination piece exists
+  if (dest_piece != NULL) {
+    //if the colors match
+    if (piece->color == dest_piece->color)
+      return CH_SAME_COLOR_PIECE_AT_DESTINATION;
+  } //handle captures later
+
   //move it according to the rules
-  return false;
+
+  int16_t rank_difference = (int16_t)dest_rank - (int16_t)source_rank;
+  int16_t file_difference = (int16_t)dest_file - (int16_t)source_file;
+  //variable that takes into account directionality of the board
+  int16_t bw_mod = (piece->color == CH_WHITE) ? 1 : -1;
+  bool valid_move = false;
+
+  switch(piece->type) {
+    //or capture diagonally
+    case CH_PAWN:
+      //pawns can move one rank
+      if ((rank_difference == bw_mod*1) && (file_difference == 0))
+          valid_move = true;
+
+      //pawns can move two rank - take into account round?
+      else if ((piece->has_moved == false) &&
+               (rank_difference == bw_mod*1) &&
+               (file_difference == 0))
+        valid_move = true;
+
+      //pawns can capture diagonally
+      else if ((dest_piece != NULL) &&
+               (rank_difference == bw_mod*1) &&
+               (abs(file_difference) == 1))
+        valid_move = true;
+
+      //pawns can en-passant
+      break;
+
+    //kings can move one square in any direction
+    case CH_KING:
+      if ((abs(rank_difference) == 1) && (abs(file_difference) == 1))
+        valid_move = true;
+      break;
+
+    case CH_DUMMY:
+    case CH_PIECE_MAX:
+    default:
+      break;
+  }
+
+  if (valid_move == true) {
+    ch_movePiece(piece, dest_rank, dest_file);
+    if (dest_piece != NULL)
+      dest_piece->captured = true;
+
+    return CH_VALID_MOVE;
+  }
+
+  return CH_INVALID_MOVE;
 }
-*/
+
+void ch_movePiece(ch_piece_h piece, uint8_t rank, uint8_t file) {
+  piece->rank = rank;
+  piece->file = file;
+  piece->has_moved = true;
+}
 
 ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file) {
   ch_piece_h piece = NULL;
@@ -138,19 +227,23 @@ void ch_drawBoard(ch_board_h board) {
       ch_color_t color = CH_WHITE;
       ch_piece_h piece = ch_getPieceAtLocation(board, rank, file);
       if (piece != NULL) {
-        switch (piece->type) {
-          case CH_PAWN:
-            character = 'p';
-            break;
+        if (piece->captured == false) {
+          switch (piece->type) {
+            case CH_PAWN:
+              character = 'p';
+              break;
 
-          case CH_KING:
-            character = 'K';
-            break;
+            case CH_KING:
+              character = 'K';
+              break;
 
-          default:
-            break;
+            case CH_DUMMY:
+            case CH_PIECE_MAX:
+            default:
+              break;
+          }
+          color = piece->color;
         }
-        color = piece->color;
       }
       if (color == CH_BLACK)
         printf("| " RED "%c" RST " ", character);

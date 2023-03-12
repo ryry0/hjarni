@@ -27,16 +27,33 @@ typedef enum ch_color_e {
   CH_COLOR_MAX
 } ch_color_t;
 
-typedef enum ch_invalid_move_e{
-  CH_DEST_OCCUPIED,
+typedef enum ch_move_e {
+  CH_VALID_MOVE,
+  CH_INVALID_MOVE,
+  CH_INVALID_SOURCE,
+  CH_INVALID_DESTINATION,
   CH_NO_PIECE_AT_ORIGIN,
-  CH_INVALID_MOVE_MAX
-} ch_invalid_move_t;
+  CH_SAME_COLOR_PIECE_AT_DESTINATION,
+  CH_CAPTURE,
+  CH_WRONG_COLOR,
+  CH_MOVE_MAX
+} ch_move_t;
+
 //in-game API
+ch_move_t ch_move(ch_board_h board,
+    uint8_t source_rank,
+    uint8_t source_file,
+    uint8_t dest_rank,
+    uint8_t dest_file,
+    ch_color_t active_color);
+
+void ch_drawBoard(ch_board_h board);
 
 //internal API exposed for testing
 ch_board_h ch_createBoard(uint8_t num_ranks, uint8_t num_files, size_t num_pieces);
 void ch_destroyBoard(ch_board_h* board);
+
+void ch_movePiece(ch_piece_h piece, uint8_t rank, uint8_t file);
 
 //getters
 size_t ch_getNumPieces(ch_board_h board);
@@ -56,7 +73,6 @@ bool ch_setPiece(ch_board_h board,
     ch_piece_type_t type, ch_color_t color);
 
 ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file);
-void ch_drawBoard(ch_board_h board);
 
 #ifdef __cplusplus
 }
