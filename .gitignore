@@ -1,0 +1,7 @@
+*.o
+*.x
+*.d
+test/lib/*
+test/chess_tests
+*.vim
+
