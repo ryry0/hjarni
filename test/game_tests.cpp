@@ -287,7 +287,7 @@ TEST(ChessGetPieceAtLocationGroup, get_at_empty)
   POINTERS_EQUAL(NULL, piece);
 }
 
-TEST_GROUP(ChessDrawBoard)
+TEST_GROUP(ChessDrawBoardGroup)
 {
   ch_board_h board;
   uint8_t num_ranks = 8;
@@ -296,7 +296,7 @@ TEST_GROUP(ChessDrawBoard)
 
   uint8_t id = 3;
   uint8_t rank = 4;
-  uint8_t file = 1;
+  uint8_t file = 2;
 
   uint8_t white_id = 5;
   uint8_t white_rank = 1;
@@ -326,20 +326,172 @@ TEST_GROUP(ChessDrawBoard)
   }
 };
 
-TEST(ChessDrawBoard, draw_board)
+TEST(ChessDrawBoardGroup, draw_board)
+{
+  //ch_drawBoard(board);
+}
+
+//todo: test if captured don't draw
+TEST(ChessDrawBoardGroup, dont_draw_captured)
+{
+}
+
+TEST_GROUP(ChessMoveGroup)
+{
+  ch_board_h board;
+  uint8_t num_ranks = 8;
+  uint8_t num_files = 8;
+  size_t num_pieces = 10;
+
+  uint8_t black_king_id = 1;
+  uint8_t black_king_rank = 8;
+  uint8_t black_king_file = 5;
+
+  uint8_t black_pawn_id = 2;
+  uint8_t black_pawn_rank = 7;
+  uint8_t black_pawn_file = 3;
+
+  uint8_t white_king_id = 3;
+  uint8_t white_king_rank = 1;
+  uint8_t white_king_file = 5;
+
+  uint8_t white_pawn_id = 4;
+  uint8_t white_pawn_rank = 2;
+  uint8_t white_pawn_file = 2;
+
+  void setup() {
+    board = ch_createBoard(num_ranks, num_files, num_pieces);
+
+    //set black pieces
+    ch_setPiece(board, black_king_id, black_king_rank,
+        black_king_file, CH_KING, CH_BLACK);
+
+    ch_setPiece(board, black_pawn_id, black_pawn_rank,
+        black_pawn_file, CH_PAWN, CH_BLACK);
+
+    //set the white pieces
+    ch_setPiece(board, white_king_id, white_king_rank,
+        white_king_file, CH_KING, CH_WHITE);
+
+    ch_setPiece(board, white_pawn_id, white_pawn_rank,
+        white_pawn_file, CH_PAWN, CH_WHITE);
+  }
+
+  void teardown() {
+    ch_destroyBoard(&board);
+  }
+};
+
+TEST(ChessMoveGroup, dummy_test_draw_board_once)
 {
   ch_drawBoard(board);
 }
 
-//test if captured don't draw
+TEST(ChessMoveGroup, source_out_of_bounds)
+{
+  CHECK_EQUAL(CH_INVALID_SOURCE, ch_move(board,
+      0,
+      0,
+      8,
+      8,
+      CH_WHITE));
+
+  CHECK_EQUAL(CH_INVALID_SOURCE, ch_move(board,
+      9,
+      9,
+      1,
+      1,
+      CH_WHITE));
+}
+
+
+TEST(ChessMoveGroup, destination_out_of_bounds)
+{
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+      1,
+      1,
+      0,
+      0,
+      CH_WHITE));
+
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+      1,
+      1,
+      9,
+      9,
+      CH_WHITE));
+
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+      1,
+      1,
+      1,
+      1,
+      CH_WHITE));
+}
+
+
+TEST(ChessMoveGroup, no_piece_at_source)
+{
+  CHECK_EQUAL(CH_NO_PIECE_AT_SOURCE, ch_move(board,
+      1,
+      1,
+      2,
+      2,
+      CH_WHITE));
+}
+
+
+TEST(ChessMoveGroup, wrong_color)
+{
+  CHECK_EQUAL(CH_WRONG_COLOR, ch_move(board,
+      black_king_rank,
+      black_king_file,
+      2,
+      2,
+      CH_WHITE));
+
+  CHECK_EQUAL(CH_WRONG_COLOR, ch_move(board,
+      white_king_rank,
+      white_king_file,
+      2,
+      2,
+      CH_BLACK));
+}
+
+
+TEST(ChessMoveGroup, same_color_piece_at_destination)
+{
+  CHECK_EQUAL(CH_SAME_COLOR_PIECE_AT_DESTINATION, ch_move(board,
+      black_king_rank,
+      black_king_file,
+      black_pawn_rank,
+      black_pawn_file,
+      CH_BLACK));
+}
+
+TEST(ChessMoveGroup, white_pawn_moves)
+{
+  for (size_t i = 1; i <= num_ranks; ++i) {
+    for (size_t j = 1; j <= num_files; ++j) {
+      if ((i == white_pawn_rank + 1) && (j == white_pawn_file))
+          continue;
+
+      if ((i == white_pawn_rank + 2) && (j == white_pawn_file))
+          continue;
+
+      CHECK_EQUAL(CH_INVALID_MOVE, ch_move(board,
+          white_pawn_rank,
+          white_pawn_file,
+          i,
+          j,
+          CH_WHITE));
+    }
+  }
+}
+
 
 //test
-//destination/source out of bounds
-//piece doesn't exist
-//active color tries to move a piece of the other color
-//if colors match on destination piece
 //capture, make sure it's off board
-//source and dest the same
 //
 //pawn move one rank
 //pawn move two rank
@@ -354,5 +506,3 @@ TEST(PIDTestGroup, SecondTest) {
   //FAIL("Fail me!");
 }
 */
-
-

@@ -126,7 +126,7 @@ ch_move_t ch_move(ch_board_h board,
   ch_piece_h piece = ch_getPieceAtLocation(board, source_rank, source_file);
 
   if (piece == NULL) //if the piece doesn't exist
-    return CH_NO_PIECE_AT_ORIGIN;
+    return CH_NO_PIECE_AT_SOURCE;
 
   //if active color tries to move a piece of the other color
   if (piece->color != active_color)
@@ -248,6 +248,7 @@ ch_piece_h ch_getPieceAtLocation(ch_board_h board, uint8_t rank, uint8_t file) {
 
 void ch_drawBoard(ch_board_h board) {
   //remember rank and file are one indexed
+  printf("\n");
   for (uint8_t rank = board->num_ranks; rank >= 1; --rank) {
     //print a bar
     for(uint8_t i = 1; i <= 4*board->num_files; ++i) printf("-");

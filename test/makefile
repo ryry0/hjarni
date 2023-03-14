@@ -12,6 +12,7 @@ SRC_FILES=$(SRC_DIR)/chess.c
 TEST_SRC_DIRS = $(TEST_DIR)
 
 TEST_TARGET=chess_tests
+COMPONENT_NAME=chess
 
 # depends on your distribution! - built using WSL
 CPPUTEST_HOME=/usr
