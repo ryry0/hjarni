@@ -621,6 +621,39 @@ TEST(ChessCheckValidMoveGroup, black_pawn_captures_white)
       CH_BLACK));
 }
 
+
+TEST(ChessCheckValidMoveGroup, king_moves)
+{
+  uint8_t white_king_new_rank = 2;
+  ch_setPiece(board, white_king_id, white_king_new_rank, white_king_file, CH_KING, CH_WHITE);
+
+  //check invalid moves
+  for (uint8_t i = 1; i <= num_ranks; ++i) {
+    for (uint8_t j = 1; j <= num_files; ++j) {
+      ch_move_t result = ch_checkValidMove(board,
+          white_king_new_rank,
+          white_king_file,
+          i,
+          j,
+          CH_WHITE);
+
+      if ((i == white_king_new_rank) && (j == white_king_file))
+        continue;
+
+      if ((i >= white_king_new_rank - 1) &&
+          (i <= white_king_new_rank + 1) &&
+          (j >= white_king_file - 1) &&
+          (j <= white_king_file + 1))
+        CHECK_EQUAL(CH_VALID_MOVE, result);
+
+
+      else
+        CHECK(CH_VALID_MOVE != result);
+
+    }
+  }
+}
+
 //test
 //en passant
 //king move anywhere once

@@ -41,6 +41,7 @@ typedef enum ch_move_e {
   CH_CAPTURE,
   CH_WRONG_COLOR,
   CH_PROMOTE,
+  CH_CAPTURE_AND_PROMOTE,
   CH_MOVE_MAX
 } ch_move_t;
 

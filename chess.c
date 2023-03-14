@@ -175,7 +175,7 @@ ch_move_t ch_checkValidMove(ch_board_h board,
 
     //kings can move one square in any direction
     case CH_KING:
-      if ((abs(rank_difference) == 1) && (abs(file_difference) == 1))
+      if ((abs(rank_difference) <= 1) && (abs(file_difference) <= 1))
         valid_move = true;
       break;
 
