@@ -40,6 +40,7 @@ typedef enum ch_move_e {
   CH_SAME_COLOR_PIECE_AT_DESTINATION,
   CH_CAPTURE,
   CH_WRONG_COLOR,
+  CH_PROMOTE,
   CH_MOVE_MAX
 } ch_move_t;
 

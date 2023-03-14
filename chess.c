@@ -170,6 +170,7 @@ ch_move_t ch_checkValidMove(ch_board_h board,
         valid_move = true;
 
       //pawns can en-passant
+      //pawns can get promoted, can also promote and capture at same time
       break;
 
     //kings can move one square in any direction

@@ -545,6 +545,82 @@ TEST(ChessCheckValidMoveGroup, white_pawn_captures_black)
 }
 
 
+
+TEST(ChessCheckValidMoveGroup, black_pawn_moves)
+{
+  //check all invalid moves
+  for (uint8_t i = 1; i <= num_ranks; ++i) {
+    for (uint8_t j = 1; j <= num_files; ++j) {
+      if ((i == black_pawn_rank - 1) && (j == black_pawn_file))
+          continue;
+
+      if ((i == black_pawn_rank - 2) && (j == black_pawn_file))
+          continue;
+
+      ch_move_t result = ch_checkValidMove(board,
+          black_pawn_rank,
+          black_pawn_file,
+          i,
+          j,
+          CH_BLACK);
+
+      CHECK(result != CH_VALID_MOVE);
+      CHECK(result != CH_CAPTURE);
+    }
+  }
+
+  //check moving forward one
+  CHECK_EQUAL(CH_VALID_MOVE, ch_checkValidMove(board,
+      black_pawn_rank,
+      black_pawn_file,
+      black_pawn_rank - 1,
+      black_pawn_file,
+      CH_BLACK));
+
+  //check moving forward two on first move
+  CHECK_EQUAL(CH_VALID_MOVE, ch_checkValidMove(board,
+      black_pawn_rank,
+      black_pawn_file,
+      black_pawn_rank - 2,
+      black_pawn_file,
+      CH_BLACK));
+
+  //check moving forward two on second move
+  ch_piece_h black_pawn =
+    ch_getPieceAtLocation(board, black_pawn_rank, black_pawn_file);
+
+  uint8_t black_pawn_new_rank = black_pawn_rank-1;
+  ch_movePiece(black_pawn, black_pawn_new_rank, black_pawn_file);
+
+  CHECK_EQUAL(CH_INVALID_MOVE, ch_checkValidMove(board,
+      black_pawn_new_rank,
+      black_pawn_file,
+      black_pawn_new_rank - 2,
+      black_pawn_file,
+      CH_BLACK));
+}
+
+TEST(ChessCheckValidMoveGroup, black_pawn_captures_white)
+{
+  ch_setPiece(board, white_pawn_id, 6, white_pawn_file, CH_PAWN, CH_WHITE);
+
+  CHECK_EQUAL(CH_CAPTURE, ch_checkValidMove(board,
+      black_pawn_rank,
+      black_pawn_file,
+      black_pawn_rank - 1,
+      black_pawn_file - 1,
+      CH_BLACK));
+
+  ch_setPiece(board, white_pawn_id, 6, 4, CH_PAWN, CH_WHITE);
+
+  CHECK_EQUAL(CH_CAPTURE, ch_checkValidMove(board,
+      black_pawn_rank,
+      black_pawn_file,
+      black_pawn_rank - 1,
+      black_pawn_file + 1,
+      CH_BLACK));
+}
+
 //test
 //en passant
 //king move anywhere once
