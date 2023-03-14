@@ -336,7 +336,7 @@ TEST(ChessDrawBoardGroup, dont_draw_captured)
 {
 }
 
-TEST_GROUP(ChessMoveGroup)
+TEST_GROUP(ChessCheckValidMoveGroup)
 {
   ch_board_h board;
   uint8_t num_ranks = 8;
@@ -382,21 +382,21 @@ TEST_GROUP(ChessMoveGroup)
   }
 };
 
-TEST(ChessMoveGroup, dummy_test_draw_board_once)
+TEST(ChessCheckValidMoveGroup, dummy_test_draw_board_once)
 {
   ch_drawBoard(board);
 }
 
-TEST(ChessMoveGroup, source_out_of_bounds)
+TEST(ChessCheckValidMoveGroup, source_out_of_bounds)
 {
-  CHECK_EQUAL(CH_INVALID_SOURCE, ch_move(board,
+  CHECK_EQUAL(CH_INVALID_SOURCE, ch_checkValidMove(board,
       0,
       0,
       8,
       8,
       CH_WHITE));
 
-  CHECK_EQUAL(CH_INVALID_SOURCE, ch_move(board,
+  CHECK_EQUAL(CH_INVALID_SOURCE, ch_checkValidMove(board,
       9,
       9,
       1,
@@ -405,23 +405,23 @@ TEST(ChessMoveGroup, source_out_of_bounds)
 }
 
 
-TEST(ChessMoveGroup, destination_out_of_bounds)
+TEST(ChessCheckValidMoveGroup, destination_out_of_bounds)
 {
-  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_checkValidMove(board,
       1,
       1,
       0,
       0,
       CH_WHITE));
 
-  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_checkValidMove(board,
       1,
       1,
       9,
       9,
       CH_WHITE));
 
-  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_move(board,
+  CHECK_EQUAL(CH_INVALID_DESTINATION, ch_checkValidMove(board,
       1,
       1,
       1,
@@ -430,9 +430,9 @@ TEST(ChessMoveGroup, destination_out_of_bounds)
 }
 
 
-TEST(ChessMoveGroup, no_piece_at_source)
+TEST(ChessCheckValidMoveGroup, no_piece_at_source)
 {
-  CHECK_EQUAL(CH_NO_PIECE_AT_SOURCE, ch_move(board,
+  CHECK_EQUAL(CH_NO_PIECE_AT_SOURCE, ch_checkValidMove(board,
       1,
       1,
       2,
@@ -441,16 +441,16 @@ TEST(ChessMoveGroup, no_piece_at_source)
 }
 
 
-TEST(ChessMoveGroup, wrong_color)
+TEST(ChessCheckValidMoveGroup, wrong_color)
 {
-  CHECK_EQUAL(CH_WRONG_COLOR, ch_move(board,
+  CHECK_EQUAL(CH_WRONG_COLOR, ch_checkValidMove(board,
       black_king_rank,
       black_king_file,
       2,
       2,
       CH_WHITE));
 
-  CHECK_EQUAL(CH_WRONG_COLOR, ch_move(board,
+  CHECK_EQUAL(CH_WRONG_COLOR, ch_checkValidMove(board,
       white_king_rank,
       white_king_file,
       2,
@@ -459,9 +459,9 @@ TEST(ChessMoveGroup, wrong_color)
 }
 
 
-TEST(ChessMoveGroup, same_color_piece_at_destination)
+TEST(ChessCheckValidMoveGroup, same_color_piece_at_destination)
 {
-  CHECK_EQUAL(CH_SAME_COLOR_PIECE_AT_DESTINATION, ch_move(board,
+  CHECK_EQUAL(CH_SAME_COLOR_PIECE_AT_DESTINATION, ch_checkValidMove(board,
       black_king_rank,
       black_king_file,
       black_pawn_rank,
@@ -469,40 +469,84 @@ TEST(ChessMoveGroup, same_color_piece_at_destination)
       CH_BLACK));
 }
 
-TEST(ChessMoveGroup, white_pawn_moves)
+TEST(ChessCheckValidMoveGroup, white_pawn_moves)
 {
-  for (size_t i = 1; i <= num_ranks; ++i) {
-    for (size_t j = 1; j <= num_files; ++j) {
+  //check all invalid moves
+  for (uint8_t i = 1; i <= num_ranks; ++i) {
+    for (uint8_t j = 1; j <= num_files; ++j) {
       if ((i == white_pawn_rank + 1) && (j == white_pawn_file))
           continue;
 
       if ((i == white_pawn_rank + 2) && (j == white_pawn_file))
           continue;
 
-      CHECK_EQUAL(CH_INVALID_MOVE, ch_move(board,
+      ch_move_t result = ch_checkValidMove(board,
           white_pawn_rank,
           white_pawn_file,
           i,
           j,
-          CH_WHITE));
+          CH_WHITE);
+
+      CHECK(result != CH_VALID_MOVE);
+      CHECK(result != CH_CAPTURE);
     }
   }
+
+  //check moving forward one
+  CHECK_EQUAL(CH_VALID_MOVE, ch_checkValidMove(board,
+      white_pawn_rank,
+      white_pawn_file,
+      white_pawn_rank + 1,
+      white_pawn_file,
+      CH_WHITE));
+
+  //check moving forward two on first move
+  CHECK_EQUAL(CH_VALID_MOVE, ch_checkValidMove(board,
+      white_pawn_rank,
+      white_pawn_file,
+      white_pawn_rank + 2,
+      white_pawn_file,
+      CH_WHITE));
+
+  //check moving forward two on second move
+  ch_piece_h white_pawn =
+    ch_getPieceAtLocation(board, white_pawn_rank, white_pawn_file);
+
+  uint8_t white_pawn_new_rank = white_pawn_rank+1;
+  ch_movePiece(white_pawn, white_pawn_new_rank, white_pawn_file);
+
+  CHECK_EQUAL(CH_INVALID_MOVE, ch_checkValidMove(board,
+      white_pawn_new_rank,
+      white_pawn_file,
+      white_pawn_new_rank + 2,
+      white_pawn_file,
+      CH_WHITE));
+}
+
+TEST(ChessCheckValidMoveGroup, white_pawn_captures_black)
+{
+  ch_setPiece(board, black_pawn_id, 3, black_pawn_file, CH_PAWN, CH_BLACK);
+
+  CHECK_EQUAL(CH_CAPTURE, ch_checkValidMove(board,
+      white_pawn_rank,
+      white_pawn_file,
+      white_pawn_rank + 1,
+      white_pawn_file + 1,
+      CH_WHITE));
+
+  ch_setPiece(board, black_pawn_id, 3, 1, CH_PAWN, CH_BLACK);
+
+  CHECK_EQUAL(CH_CAPTURE, ch_checkValidMove(board,
+      white_pawn_rank,
+      white_pawn_file,
+      white_pawn_rank + 1,
+      white_pawn_file - 1,
+      CH_WHITE));
 }
 
 
 //test
-//capture, make sure it's off board
-//
-//pawn move one rank
-//pawn move two rank
-//pawn capture diagonally
+//en passant
 //king move anywhere once
 
-/*
-TEST(PIDTestGroup, SecondTest) {
-  //STRCMP_EQUAL("hello", "world");
-  //LONGS_EQUAL(1, 2);
-  //CHECK(false);
-  //FAIL("Fail me!");
-}
-*/
+//capture, make sure it's off board

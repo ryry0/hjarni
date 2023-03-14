@@ -44,7 +44,7 @@ typedef enum ch_move_e {
 } ch_move_t;
 
 //in-game API
-ch_move_t ch_move(ch_board_h board,
+ch_move_t ch_checkValidMove(ch_board_h board,
     uint8_t source_rank,
     uint8_t source_file,
     uint8_t dest_rank,

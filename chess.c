@@ -98,7 +98,7 @@ bool ch_setPiece(ch_board_h board,
   return true;
 }
 
-ch_move_t ch_move(ch_board_h board,
+ch_move_t ch_checkValidMove(ch_board_h board,
     uint8_t source_rank,
     uint8_t source_file,
     uint8_t dest_rank,
@@ -159,7 +159,7 @@ ch_move_t ch_move(ch_board_h board,
 
       //pawns can move two rank - take into account round?
       else if ((piece->has_moved == false) &&
-               (rank_difference == bw_mod*1) &&
+               (rank_difference == bw_mod*2) &&
                (file_difference == 0))
         valid_move = true;
 
@@ -196,24 +196,26 @@ ch_move_t ch_move(ch_board_h board,
       break;
   }
 
-  if (valid_move == true) {
-    ch_movePiece(piece, dest_rank, dest_file);
-    if (dest_piece != NULL) {
-      dest_piece->captured = true;
-      dest_piece->rank = 0; //move off board
-      dest_piece->file = 0;
-    }
+  if ((valid_move) && (dest_piece != NULL))
+      return CH_CAPTURE;
 
-    return CH_VALID_MOVE;
-  }
-
-  return CH_INVALID_MOVE;
+  return valid_move ? CH_VALID_MOVE : CH_INVALID_MOVE;
 }
 
 void ch_movePiece(ch_piece_h piece, uint8_t rank, uint8_t file) {
   piece->rank = rank;
   piece->file = file;
   piece->has_moved = true;
+}
+
+void ch_capturePiece(ch_piece_h piece) {
+  piece->captured = true;
+  piece->rank = 0; //move off board
+  piece->file = 0;
+}
+
+void ch_promotePiece(ch_piece_h piece, ch_piece_type_t new_type) {
+  piece->type = new_type;
 }
 
 ch_move_t ch_moveParseSimpleNotation(ch_board_h board, char *str, ch_color_t active_color) {
@@ -225,7 +227,7 @@ ch_move_t ch_moveParseSimpleNotation(ch_board_h board, char *str, ch_color_t act
   uint8_t dest_file = str[2] - 'a' + 1;
   uint8_t dest_rank = str[3];
 
-  return ch_move(board, source_rank, source_file, dest_rank, dest_file,
+  return ch_checkValidMove(board, source_rank, source_file, dest_rank, dest_file,
       active_color);
 }
 
